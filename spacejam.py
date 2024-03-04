@@ -2,10 +2,11 @@ from direct.showbase.ShowBase import ShowBase
 import math, sys, random
 import DefensePaths as defensePaths
 import SpaceJamClasses as spaceJamClasses
+import Player as myPlayer
 from panda3d.core import CollisionTraverser, CollisionHandlerPusher
 from CollideObjectBase import PlacedObject
 
-# Colliders are broken.
+# Colliders are still in progress.
 class SpaceJam(ShowBase): #Constructor
     def __init__(self):
         ShowBase.__init__(self)
@@ -98,7 +99,7 @@ class SpaceJam(ShowBase): #Constructor
         self.Universe = spaceJamClasses.Universe(self.loader, "./Assets/Universe/Universe.x", self.render, 'Universe', "Assets/Universe/space-galaxy.jpg", (0, 0, 0), 15000)
 
         # Player setup
-        self.Player = spaceJamClasses.Player(self.loader, "./Assets/Player/theBorg.x", self.render, 'Player', "Assets/Player/theBorg.jpg", (150, 1500, 67), 5, self.taskMgr, self.render)
+        self.Player = myPlayer.Player(self.loader, "./Assets/Player/theBorg.x", self.render, 'Player', "Assets/Player/theBorg.jpg", (150, 1500, 67), 5, self.taskMgr, self.render)
 
         # Space station setup
         self.Station = spaceJamClasses.Station(self.loader, "./Assets/SpaceStation1B/spaceStation.x", self.render, 'Station', "Assets/SpaceStation1B/SpaceStation1_Dif2.png", (-1500, 7000, 100), 100)
