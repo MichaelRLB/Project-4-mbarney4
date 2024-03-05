@@ -5,8 +5,9 @@ from CollideObjectBase import SphereCollideObject
 from typing import Callable
 
 class Player(SphereCollideObject):
-    def __init__(self, loader: Loader, modelPath: str, parentNode: NodePath, nodeName: str, texPath: str, posVec: Vec3, scaleVec: float, taskManager: Task, renderer: NodePath):
+    def __init__(self, loader: Loader, modelPath: str, parentNode: NodePath, nodeName: str, texPath: str, posVec: Vec3, scaleVec: float, taskManager: Task, renderer: NodePath, accept: Callable[[str,Callable], None]):
         super(Player, self).__init__(loader, modelPath, parentNode, nodeName, Vec3(0, 0, 0), 0.5)
+        self.accept = accept
         self.taskManager = taskManager
         self.renderer = renderer
         self.modelNode = loader.loadModel(modelPath)
@@ -144,5 +145,3 @@ class Player(SphereCollideObject):
         self.accept('arrow_down-up', self.DownTurn, [0])
         self.accept('s', self.DownTurn, [1])
         self.accept('s-up', self.DownTurn, [0]) 
-        accept: Callable[[str,Callable], None]
-        self.accept = accept
