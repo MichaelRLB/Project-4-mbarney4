@@ -26,19 +26,19 @@ class SpaceJam(ShowBase): #Constructor
         self.DrawCircleXY()
         self.DrawCircleXZ()
         self.DrawCircleYZ()
-
+        # Colliders.
         self.cTrav = CollisionTraverser()
         self.cTrav.traverse(self.render)
         self.pusher = CollisionHandlerPusher()
         self.pusher.addCollider(self.Player.collisionNode, self.Player.modelNode)
         self.cTrav.addCollider(self.Player.collisionNode, self.pusher)
-        # Station is moving down when collider is attached. How do I fix this?
+        # Station colliders
         self.pusher.addCollider(self.Station.collisionNode, self.Station.modelNode)
-        self.cTrav.addCollider(self.Station.collisionNode, self.pusher)
+        self.cTrav.addCollider(self.Player.collisionNode, self.pusher)
+
 
         # Planet 1 colliders.
         self.pusher.addCollider(self.Planet1.collisionNode, self.Planet1.modelNode)
-        self.cTrav.addCollider(self.Planet1.collisionNode, self.pusher)
 
         self.cTrav.showCollisions(self.render)
 
