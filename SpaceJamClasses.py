@@ -7,7 +7,7 @@ from CollideObjectBase import *
 # Figure out the correct scales for the collision functions.
 class Planet(SphereCollideObject):
     def __init__(self, loader: Loader, modelPath: str, parentNode: NodePath, nodeName: str, texPath: str, posVec: Vec3, scaleVec: float):
-        super(Planet, self).__init__(loader, modelPath, parentNode, nodeName, Vec3(2, 2, 2), 0.2)  
+        super(Planet, self).__init__(loader, modelPath, parentNode, nodeName, Vec3(0, 0, 0), 0.2)  
         self.modelNode = loader.loadModel(modelPath)
         self.modelNode.reparentTo(parentNode)
         self.modelNode.setPos(posVec)
@@ -41,7 +41,7 @@ class Station(CapsuleCollidableObject):
 class Drone(SphereCollideObject):
     droneCount = 0
     def __init__(self, loader: Loader, modelPath: str, parentNode: NodePath, nodeName: str, texPath: str, posVec: Vec3, scaleVec: float):
-        super(Drone, self).__init__(loader, modelPath, parentNode, nodeName, Vec3(2, 2, 2), 0.4)        
+        super(Drone, self).__init__(loader, modelPath, parentNode, nodeName, Vec3(0, 0, 0), 0.4)        
 
         self.modelNode = loader.loadModel(modelPath)
         self.modelNode.reparentTo(parentNode)
@@ -51,3 +51,22 @@ class Drone(SphereCollideObject):
         self.modelNode.setName(nodeName)
         tex = loader.loadTexture(texPath)
         self.modelNode.setTexture(tex, 1)
+class Missile(SphereCollideObject):
+    fireModels = {}
+    cNodes = {}
+    collisionSolids = {}
+    Intervals = {}
+    missileCount = 0
+    def __init__(self, loader: Task.Loader, modelPath: str, parentNode: NodePath, nodeName: str, posVec: Vec3, scaleVec: float = 1.0):
+        super().__init__(loader, modelPath, parentNode, nodeName, Vec3(0, 0, 0), 3.0)
+        self.modelNode.setScale(scaleVec)
+        self.modelNode.setPos(posVec)
+        Missile.missileCount += 1
+        Missile.fireModels[nodeName] = self.modelNode
+        Missile.cNodes[nodeName] = self.collisionNode
+        # We retrieve the solid for our collisionNode.
+        Missile.collisionSolids[nodeName] = self.collisionNode.node().getSolid(0)
+        Missile.cNodes[nodeName].show()
+        print("Fire torpedo #" + str(Missile.missileCount))
+        Missile.collisionSolids[nodeName] = self.collisionNode.node().getSolid(0)
+        print("Fire torpedo #" + str(Missile.missileCount))

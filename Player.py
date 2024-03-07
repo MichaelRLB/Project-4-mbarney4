@@ -1,8 +1,10 @@
 from direct.showbase.ShowBase import ShowBase
 from direct.task import Task
+from direct.gui.OnscreenImage import OnscreenImage
 from panda3d.core import *
 from CollideObjectBase import SphereCollideObject
 from typing import Callable
+from SpaceJamClasses import Missile
 
 class Player(SphereCollideObject):
     def __init__(self, loader: Loader, modelPath: str, parentNode: NodePath, nodeName: str, texPath: str, posVec: Vec3, scaleVec: float, taskManager: Task, renderer: NodePath, accept: Callable[[str,Callable], None]):
@@ -10,6 +12,8 @@ class Player(SphereCollideObject):
         self.accept = accept
         self.taskManager = taskManager
         self.renderer = renderer
+        self.render = parentNode
+        self.loader = loader
         self.modelNode = loader.loadModel(modelPath)
         self.modelNode.reparentTo(parentNode)
         self.modelNode.setPos(posVec)
@@ -18,7 +22,14 @@ class Player(SphereCollideObject):
         self.modelNode.setName(nodeName)
         tex = loader.loadTexture(texPath)
         self.modelNode.setTexture(tex, 1)
+
+        self.reloadTime = .25
+        self.missileDistance = 4000 # Until the missile explodes.
+        self.missileBay = 1 # Only one missile in the missile bay to be launched.
+        self.taskManager.add(self.CheckIntervals, 'checkMissiles', 34)       
+
         self.SetKeyBindings()
+        self.EnableHUD()
         #Call to control class.
     # Forward and backward thrusts (back thrusts still in development)
     def Thrust(self, keyDown):
@@ -110,6 +121,63 @@ class Player(SphereCollideObject):
         rate = 3
         self.modelNode.setP(self.modelNode.getP() - rate)
         return Task.cont    
+    def Fire(self):
+        if self.missileBay:
+            travRate = self.missileDistance
+            aim = self.render.getRelativeVector(self.modelNode, Vec3.forward()) # The direction the spaceship.
+            # Normalizing a vecor makes it consistant all the time.
+            aim.normalize()
+
+            fireSolution = aim * travRate
+            inFront = aim * 150
+            travVec = fireSolution + self.modelNode.getPos()
+            self.missileBay -= 1
+            tag = 'Missile' + str(Missile.missileCount)
+
+            posVec = self.modelNode.getPos() + inFront # Spawn the missile in front of the nose of the ship.
+
+            #Create our missile.
+            currentMissile = Missile(self.loader, './Assets/Phaser/phaser.egg', self.render, tag, posVec, 4.0)
+
+            # "fluid = 1" makes collision be checked between the last interval and this interval to make sure there's nothing in-between both check that wasn't hit.
+            Missile.Intervals[tag] = currentMissile.modelNode.posInterval(2.0, travVec, startPos = posVec, fluid = 1)
+            Missile.Intervals[tag].start()
+        else:
+            # If we aren't reloading, we want to start reloading.
+            if not self.taskManager.hasTaskNamed('reload'):
+                print('Initializing Reload...')
+                #Call the reload method on no delay.
+                self.taskManager.doMethodLater(0, self.Reload, 'reload')
+                return Task.cont
+    def Reload(self, task):
+        if task.time > self.reloadTime:
+            self.missileBay += 1
+            if self.missileBay > 1:
+                self.missileBay = 1
+            print("Reload complete.")
+            return Task.done
+        elif task.time <= self.reloadTime:
+            #print("Reload proceeding...")
+            return Task.cont
+    def CheckIntervals(self, task):
+        for i in Missile.Intervals:
+            if not Missile.Intervals[i].isPlaying():
+                # If its path is done, we get rid of everything to do with that missile.
+                Missile.cNodes[i].detachNode()
+                Missile.fireModels[i].detachNode()
+                del Missile.Intervals[i]
+                del Missile.fireModels[i]
+                del Missile.cNodes[i]
+                del Missile.collisionSolids[i]
+                print(i + ' has reached the end of its fire solution.')
+                # We break because when things are deleted from a dictionary, we have to refactor the dictionary so we can reuse it. This is because when we delete things, there's a gap at that point.
+                break
+        return Task.cont
+
+    def EnableHUD(self):
+        self.Hud = OnscreenImage(image = "./Assets/Hud/Reticle3b.png", pos = Vec3(0, 0, 0), scale = 0.1)
+        self.Hud.setTransparency(TransparencyAttrib.MAlpha)
+
 
     # Keybinds.
     def SetKeyBindings(self):
@@ -145,3 +213,5 @@ class Player(SphereCollideObject):
         self.accept('arrow_down-up', self.DownTurn, [0])
         self.accept('s', self.DownTurn, [1])
         self.accept('s-up', self.DownTurn, [0]) 
+
+        self.accept('f', self.Fire)

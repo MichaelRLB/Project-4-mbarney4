@@ -6,7 +6,7 @@ import Player as myPlayer
 from panda3d.core import CollisionTraverser, CollisionHandlerPusher
 from CollideObjectBase import PlacedObject
 
-# Colliders are still in progress.
+# Colliders aren't behaving correctly: deep-dive may be required.
 class SpaceJam(ShowBase): #Constructor
     def __init__(self):
         ShowBase.__init__(self)
@@ -30,15 +30,8 @@ class SpaceJam(ShowBase): #Constructor
         self.cTrav = CollisionTraverser()
         self.cTrav.traverse(self.render)
         self.pusher = CollisionHandlerPusher()
-        self.pusher.addCollider(self.Player.collisionNode, self.Player.modelNode)
-        self.cTrav.addCollider(self.Player.collisionNode, self.pusher)
-        # Station colliders
-        self.pusher.addCollider(self.Station.collisionNode, self.Station.modelNode)
-        self.cTrav.addCollider(self.Player.collisionNode, self.pusher)
-
-
-        # Planet 1 colliders.
-        self.pusher.addCollider(self.Planet1.collisionNode, self.Planet1.modelNode)
+        #self.pusher.addCollider(self.Player.collisionNode, self.Player.modelNode)
+        #self.cTrav.addCollider(self.Player.collisionNode, self.pusher)
 
         self.cTrav.showCollisions(self.render)
 
